@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "carlo",
+    "password": "kenay123",
+    "database": "pw-2025-0_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "carlo",
+    "password": "kenay123",
+    "database": "pw-2025-0_db",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
