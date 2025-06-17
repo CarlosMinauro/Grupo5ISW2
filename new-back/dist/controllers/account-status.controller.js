@@ -7,7 +7,7 @@ class AccountStatusController {
         this.getMonthlyStatus = async (req, res) => {
             var _a;
             try {
-                const { month, year } = req.query;
+                const { month, year, credit_card_id } = req.query;
                 const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
                 if (!userId) {
                     res.status(401).json({ message: 'Usuario no autenticado' });
@@ -17,7 +17,17 @@ class AccountStatusController {
                     res.status(400).json({ message: 'Mes y año son requeridos' });
                     return;
                 }
-                const status = await this.accountStatusService.getMonthlyStatus(Number(month), Number(year), userId);
+                if (!credit_card_id) {
+                    res.status(400).json({ message: 'El ID de la tarjeta es requerido' });
+                    return;
+                }
+                console.log('AccountStatusController: Obteniendo estado mensual para:', {
+                    month,
+                    year,
+                    userId,
+                    creditCardId: credit_card_id
+                });
+                const status = await this.accountStatusService.getMonthlyStatus(Number(month), Number(year), userId, Number(credit_card_id));
                 res.json(status);
             }
             catch (error) {

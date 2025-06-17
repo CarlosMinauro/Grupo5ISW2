@@ -31,19 +31,32 @@ export class AccountStatusController {
         return;
       }
 
+      if (!credit_card_id) {
+        res.status(400).json({ message: 'El ID de la tarjeta es requerido' });
+        return;
+      }
+
+      console.log('AccountStatusController: Obteniendo estado mensual para:', {
+        month,
+        year,
+        userId,
+        creditCardId: credit_card_id
+      });
+
       const status = await this.accountStatusService.getMonthlyStatus(
         Number(month),
         Number(year),
         userId,
-        credit_card_id ? Number(credit_card_id) : undefined
+        Number(credit_card_id)
       );
 
       res.json(status);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getMonthlyStatus:', error);
       res.status(500).json({ 
         message: 'Error al obtener el estado de cuenta',
-        error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+        error: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   };

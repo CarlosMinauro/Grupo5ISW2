@@ -24,67 +24,55 @@
  */
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { RootState } from '../index';
-
-export interface Expense {
-  id: number;
-  user_id: number;
-  date: string;
-  amount: number;
-  description: string;
-  recurring: boolean;
-  category_id: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { Expense } from '../../types';
+import { expenseService } from '../../services/api';
 
 interface ExpenseState {
   expenses: Expense[];
-  totalExpenses: number;
   loading: boolean;
   error: string | null;
+  totalExpenses: number;
 }
 
 const initialState: ExpenseState = {
   expenses: [],
-  totalExpenses: 0,
   loading: false,
   error: null,
+  totalExpenses: 0
 };
 
 export const fetchExpenses = createAsyncThunk(
   'expenses/fetchExpenses',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/expenses`);
-      return response.data;
+      const response = await expenseService.getExpenses();
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Error al cargar gastos');
+      return rejectWithValue(error.response?.data?.message || 'Error fetching expenses');
     }
   }
 );
 
 export const createExpense = createAsyncThunk(
   'expenses/createExpense',
-  async (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>, { rejectWithValue }) => {
+  async (expenseData: Partial<Expense>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/expenses`, expense);
-      return response.data;
+      const response = await expenseService.createExpense(expenseData);
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Error al crear gasto');
+      return rejectWithValue(error.response?.data?.message || 'Error creating expense');
     }
   }
 );
 
 export const updateExpense = createAsyncThunk(
   'expenses/updateExpense',
-  async ({ id, ...expense }: Expense, { rejectWithValue }) => {
+  async ({ id, expenseData }: { id: number; expenseData: Partial<Expense> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API_URL}/expenses/${id}`, expense);
-      return response.data;
+      const response = await expenseService.updateExpense(id, expenseData);
+      return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Error al actualizar gasto');
+      return rejectWithValue(error.response?.data?.message || 'Error updating expense');
     }
   }
 );
@@ -93,10 +81,10 @@ export const deleteExpense = createAsyncThunk(
   'expenses/deleteExpense',
   async (id: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/expenses/${id}`);
+      await expenseService.deleteExpense(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Error al eliminar gasto');
+      return rejectWithValue(error.response?.data?.message || 'Error deleting expense');
     }
   }
 );
@@ -104,11 +92,7 @@ export const deleteExpense = createAsyncThunk(
 const expenseSlice = createSlice({
   name: 'expenses',
   initialState,
-  reducers: {
-    clearError: (state) => {
-      state.error = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchExpenses.pending, (state) => {
@@ -117,8 +101,13 @@ const expenseSlice = createSlice({
       })
       .addCase(fetchExpenses.fulfilled, (state, action) => {
         state.loading = false;
-        state.expenses = action.payload;
-        state.totalExpenses = action.payload.reduce((total: number, expense: Expense) => total + expense.amount, 0);
+        state.expenses = action.payload.data;
+        state.totalExpenses = action.payload.data.reduce((total: number, expense: Expense) => {
+          if (expense.transaction_type === 'expense') {
+            return total + expense.amount;
+          }
+          return total;
+        }, 0);
       })
       .addCase(fetchExpenses.rejected, (state, action) => {
         state.loading = false;
@@ -130,8 +119,10 @@ const expenseSlice = createSlice({
       })
       .addCase(createExpense.fulfilled, (state, action) => {
         state.loading = false;
-        state.expenses.push(action.payload);
-        state.totalExpenses += action.payload.amount;
+        state.expenses.push(action.payload.data);
+        if (action.payload.data.transaction_type === 'expense') {
+          state.totalExpenses += action.payload.data.amount;
+        }
       })
       .addCase(createExpense.rejected, (state, action) => {
         state.loading = false;
@@ -143,11 +134,15 @@ const expenseSlice = createSlice({
       })
       .addCase(updateExpense.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.expenses.findIndex(expense => expense.id === action.payload.id);
+        const index = state.expenses.findIndex(expense => expense.id === action.payload.data.id);
         if (index !== -1) {
-          state.totalExpenses -= state.expenses[index].amount;
-          state.expenses[index] = action.payload;
-          state.totalExpenses += action.payload.amount;
+          if (state.expenses[index].transaction_type === 'expense') {
+            state.totalExpenses -= state.expenses[index].amount;
+          }
+          state.expenses[index] = action.payload.data;
+          if (action.payload.data.transaction_type === 'expense') {
+            state.totalExpenses += action.payload.data.amount;
+          }
         }
       })
       .addCase(updateExpense.rejected, (state, action) => {
@@ -161,17 +156,16 @@ const expenseSlice = createSlice({
       .addCase(deleteExpense.fulfilled, (state, action) => {
         state.loading = false;
         const expense = state.expenses.find(e => e.id === action.payload);
-        if (expense) {
+        if (expense && expense.transaction_type === 'expense') {
           state.totalExpenses -= expense.amount;
-          state.expenses = state.expenses.filter(e => e.id !== action.payload);
         }
+        state.expenses = state.expenses.filter(e => e.id !== action.payload);
       })
       .addCase(deleteExpense.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
-  },
+  }
 });
 
-export const { clearError } = expenseSlice.actions;
 export default expenseSlice.reducer; 

@@ -6,7 +6,17 @@ class ExpenseService {
     constructor() {
         this.expenseRepository = new expense_repository_1.ExpenseRepository();
     }
+    static getInstance() {
+        if (!ExpenseService.instance) {
+            ExpenseService.instance = new ExpenseService();
+        }
+        return ExpenseService.instance;
+    }
     async createExpense(expenseData) {
+        console.log('Creando gasto con datos:', expenseData);
+        if (!expenseData.credit_card_id) {
+            throw new Error('El ID de la tarjeta es requerido');
+        }
         return this.expenseRepository.create(expenseData);
     }
     async updateExpense(id, expenseData) {
@@ -15,8 +25,14 @@ class ExpenseService {
     async deleteExpense(id) {
         return this.expenseRepository.delete(id);
     }
-    async getExpensesByUser(userId) {
-        return this.expenseRepository.findByUserId(userId);
+    async getExpensesByUser(userId, creditCardId) {
+        console.log('ExpenseService: Obteniendo gastos para usuario:', userId, creditCardId ? `y tarjeta ${creditCardId}` : '');
+        if (!creditCardId) {
+            throw new Error('El ID de la tarjeta es requerido');
+        }
+        const expenses = await this.expenseRepository.findByUserId(userId, creditCardId);
+        console.log('ExpenseService: Gastos encontrados:', expenses.length);
+        return expenses;
     }
     async getExpensesByCategory(categoryId) {
         return this.expenseRepository.findByCategoryId(categoryId);

@@ -15,6 +15,7 @@ import {
   Card as MuiCard,
   CardContent,
 } from '@mui/material';
+import { formatDate } from '../utils/formatters';
 
 const CardSelection: React.FC = () => {
   const navigate = useNavigate();
@@ -92,10 +93,10 @@ const CardSelection: React.FC = () => {
             <MuiCard key={card.id} sx={{ mb: 2, cursor: 'pointer' }} onClick={() => handleSelectCard(card)}>
               <CardContent>
                 <Typography variant="h6" component="div">
-                  Card Number: {card.card_number}
+                  Card Number: **** **** **** {card.card_number.slice(-4)}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Expires: {card.expiry_date}
+                  Expires: {formatDate(card.expiration_date ?? '')}
                 </Typography>
               </CardContent>
             </MuiCard>

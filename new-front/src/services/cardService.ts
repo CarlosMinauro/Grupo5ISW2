@@ -1,45 +1,78 @@
-import api from './api';
+import { api } from './api';
+import { Card, ApiResponse } from '../types';
 
-interface Card {
-  id: number;
-  user_id: number;
-  card_number: string;
-  expiry_date: string;
-  card_holder_name: string;
-  brand?: string;
-  bank?: string;
-  is_active?: boolean;
-  created_at?: string;
-}
-
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-}
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
 
 export const cardService = {
   getCards: async (): Promise<ApiResponse<Card[]>> => {
-    try {
-      console.log('Obteniendo tarjetas...');
-      const response = await api.get('/api/cards');
-      console.log('Respuesta de tarjetas:', response.data);
-      return { success: true, data: response.data.cards };
-    } catch (error: any) {
-      console.error('Error al obtener tarjetas:', error);
-      return { success: false, message: error.response?.data?.message || 'Error fetching cards' };
-    }
+    const response = await api.get('/api/cards');
+    return {
+      success: true,
+      message: 'Cards fetched successfully',
+      data: response.data.cards.map((card: any) => ({
+        id: Number(card.id),
+        user_id: Number(card.user_id),
+        card_number: String(card.card_number),
+        card_holder_name: String(card.card_holder_name),
+        expiration_date: card.expiration_date ? new Date(card.expiration_date) : null,
+        brand: String(card.brand),
+        bank: String(card.bank),
+        is_active: Boolean(card.is_active),
+        created_at: new Date(card.created_at),
+        createdAt: card.createdAt ? new Date(card.createdAt) : undefined,
+        updatedAt: card.updatedAt ? new Date(card.updatedAt) : undefined,
+      }))
+    };
   },
-  addCard: async (card: Omit<Card, 'id' | 'user_id' | 'is_active' | 'created_at'>): Promise<ApiResponse<Card>> => {
-    try {
-      console.log('Enviando petición para agregar tarjeta:', card);
-      const response = await api.post('/api/cards', card);
-      console.log('Respuesta de agregar tarjeta:', response.data);
-      return { success: true, data: response.data.card };
-    } catch (error: any) {
-      console.error('Error al agregar tarjeta:', error);
-      return { success: false, message: error.response?.data?.message || 'Error adding card' };
-    }
+
+  createCard: async (cardData: Partial<Card>): Promise<ApiResponse<Card>> => {
+    const response = await api.post('/api/cards', cardData);
+    return {
+      success: true,
+      message: 'Card created successfully',
+      data: {
+        id: Number(response.data.card.id),
+        user_id: Number(response.data.card.user_id),
+        card_number: String(response.data.card.card_number),
+        card_holder_name: String(response.data.card.card_holder_name),
+        expiration_date: response.data.card.expiration_date ? new Date(response.data.card.expiration_date) : null,
+        brand: String(response.data.card.brand),
+        bank: String(response.data.card.bank),
+        is_active: Boolean(response.data.card.is_active),
+        created_at: new Date(response.data.card.created_at),
+        createdAt: response.data.card.createdAt ? new Date(response.data.card.createdAt) : undefined,
+        updatedAt: response.data.card.updatedAt ? new Date(response.data.card.updatedAt) : undefined,
+      }
+    };
   },
-  // Add other card-related API calls here (e.g., updateCard, deleteCard)
+
+  updateCard: async (id: number, cardData: Partial<Card>): Promise<ApiResponse<Card>> => {
+    const response = await api.put(`/api/cards/${id}`, cardData);
+    return {
+      success: true,
+      message: 'Card updated successfully',
+      data: {
+        id: Number(response.data.card.id),
+        user_id: Number(response.data.card.user_id),
+        card_number: String(response.data.card.card_number),
+        card_holder_name: String(response.data.card.card_holder_name),
+        expiration_date: response.data.card.expiration_date ? new Date(response.data.card.expiration_date) : null,
+        brand: String(response.data.card.brand),
+        bank: String(response.data.card.bank),
+        is_active: Boolean(response.data.card.is_active),
+        created_at: new Date(response.data.card.created_at),
+        createdAt: response.data.card.createdAt ? new Date(response.data.card.createdAt) : undefined,
+        updatedAt: response.data.card.updatedAt ? new Date(response.data.card.updatedAt) : undefined,
+      }
+    };
+  },
+
+  deleteCard: async (id: number): Promise<ApiResponse<void>> => {
+    await api.delete(`/api/cards/${id}`);
+    return {
+      success: true,
+      message: 'Card deleted successfully',
+      data: undefined
+    };
+  }
 }; 

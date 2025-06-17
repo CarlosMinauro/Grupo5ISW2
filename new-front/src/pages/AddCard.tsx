@@ -38,7 +38,7 @@ const AddCard: React.FC = () => {
     setError(null);
     try {
       console.log('Enviando datos de tarjeta:', form);
-      const response = await cardService.addCard({ ...form });
+      const response = await cardService.createCard({ ...form });
       console.log('Respuesta del servidor:', response);
       if (response.success) {
         console.log('Tarjeta agregada exitosamente');

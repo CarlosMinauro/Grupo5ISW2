@@ -41,7 +41,7 @@ export interface IExpense {
   amount: number;
   description: string;
   recurring: boolean;
-  category_id: number;
+  category_id?: number | null;
   credit_card_id?: number;
   transaction_type: string;
   createdAt?: Date;
@@ -69,7 +69,7 @@ export interface ICreditCard {
   user_id: number;
   card_number: string;
   card_holder_name: string;
-  expiration_date: Date;
+  expiration_date?: Date | null;
   brand: string;
   bank: string;
   is_active: boolean;

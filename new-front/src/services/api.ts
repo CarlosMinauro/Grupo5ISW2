@@ -3,7 +3,7 @@ import { LoginCredentials, RegisterData, ApiResponse, User, Expense, Budget, Cat
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export const expenseService = {
   getExpenses: async (creditCardId?: number): Promise<ApiResponse<Expense[]>> => {
     console.log('Obteniendo gastos...', creditCardId ? `para tarjeta ${creditCardId}` : 'para todas las tarjetas');
     const response = await api.get('/api/expenses', {
-      params: { creditCardId }
+      params: { credit_card_id: creditCardId }
     });
     console.log('Respuesta del servidor:', response.data);
     // Ensure the response data matches the database structure
@@ -75,29 +75,21 @@ export const expenseService = {
     return { success: true, message: 'Expenses fetched successfully', data: expenses };
   },
 
-  createExpense: async (expense: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Expense>> => {
-    const response = await api.post('/api/expenses', {
-      ...expense,
-      amount: Number(expense.amount),
-      category_id: Number(expense.category_id),
-      user_id: Number(expense.user_id),
-      credit_card_id: expense.credit_card_id,
-      description: String(expense.description).trim(),
-      date: String(expense.date),
-      recurring: Boolean(expense.recurring),
-    });
-    // Transform the response to match the expected format
+  createExpense: async (expenseData: Partial<Expense>): Promise<ApiResponse<Expense>> => {
+    const response = await api.post('/api/expenses', expenseData);
     return {
       success: true,
-      message: response.data.message,
+      message: 'Expense created successfully',
       data: {
         id: Number(response.data.expense.id),
         user_id: Number(response.data.expense.user_id),
-        category_id: Number(response.data.expense.category_id),
+        date: new Date(response.data.expense.date),
         amount: Number(response.data.expense.amount),
         description: String(response.data.expense.description),
-        date: String(response.data.expense.date),
         recurring: Boolean(response.data.expense.recurring),
+        category_id: response.data.expense.category_id ? Number(response.data.expense.category_id) : null,
+        credit_card_id: response.data.expense.credit_card_id ? Number(response.data.expense.credit_card_id) : undefined,
+        transaction_type: String(response.data.expense.transaction_type),
         createdAt: response.data.expense.createdAt ? new Date(response.data.expense.createdAt) : undefined,
         updatedAt: response.data.expense.updatedAt ? new Date(response.data.expense.updatedAt) : undefined,
       }

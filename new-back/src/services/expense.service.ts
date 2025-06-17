@@ -2,13 +2,25 @@ import { ExpenseRepository } from '../repositories/expense.repository';
 import { IExpense } from '../interfaces/models';
 
 export class ExpenseService {
+  private static instance: ExpenseService;
   private expenseRepository: ExpenseRepository;
 
-  constructor() {
+  private constructor() {
     this.expenseRepository = new ExpenseRepository();
   }
 
+  public static getInstance(): ExpenseService {
+    if (!ExpenseService.instance) {
+      ExpenseService.instance = new ExpenseService();
+    }
+    return ExpenseService.instance;
+  }
+
   async createExpense(expenseData: Partial<IExpense>): Promise<IExpense> {
+    console.log('Creando gasto con datos:', expenseData);
+    if (!expenseData.credit_card_id) {
+      throw new Error('El ID de la tarjeta es requerido');
+    }
     return this.expenseRepository.create(expenseData);
   }
 
@@ -22,6 +34,9 @@ export class ExpenseService {
 
   async getExpensesByUser(userId: number, creditCardId?: number): Promise<IExpense[]> {
     console.log('ExpenseService: Obteniendo gastos para usuario:', userId, creditCardId ? `y tarjeta ${creditCardId}` : '');
+    if (!creditCardId) {
+      throw new Error('El ID de la tarjeta es requerido');
+    }
     const expenses = await this.expenseRepository.findByUserId(userId, creditCardId);
     console.log('ExpenseService: Gastos encontrados:', expenses.length);
     return expenses;

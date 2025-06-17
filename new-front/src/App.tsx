@@ -10,6 +10,14 @@ import Dashboard from './pages/Dashboard';
 import CardSelection from './pages/CardSelection';
 import AddCard from './pages/AddCard';
 
+// Configure future flags for React Router v7
+const router = {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+};
+
 // Protected Route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
@@ -37,7 +45,7 @@ const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router future={router.future}>
         <Routes>
           <Route
             path="/login"

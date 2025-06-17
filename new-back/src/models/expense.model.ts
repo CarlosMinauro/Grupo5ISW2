@@ -1,6 +1,6 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../config/database';
-import { IExpense } from '../interfaces/models';
+import { IExpense, ICategory } from '../interfaces/models';
 import User from './user.model';
 import Category from './category.model';
 import CreditCard from './credit-card.model';
@@ -12,11 +12,12 @@ class Expense extends Model<IExpense> implements IExpense {
   public amount!: number;
   public description!: string;
   public recurring!: boolean;
-  public category_id!: number;
-  public credit_card_id?: number;
+  public category_id!: number | null;
+  public credit_card_id?: number | null;
   public transaction_type!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  public Category?: ICategory;
 }
 
 Expense.init(
@@ -53,7 +54,7 @@ Expense.init(
     },
     category_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: Category,
         key: 'id',

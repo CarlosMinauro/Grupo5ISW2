@@ -19,8 +19,9 @@ const authenticateToken = (req, res, next) => {
                 return res.status(403).json({ message: 'Token inválido' });
             }
             req.user = user;
-            next();
+            return next();
         });
+        return;
     }
     catch (error) {
         console.error('Authentication middleware error:', error);

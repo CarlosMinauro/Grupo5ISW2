@@ -10,7 +10,7 @@ import accountStatusRoutes from './routes/account-status.routes';
 import creditCardRoutes from './routes/credit-card.routes';
 import sequelize from './config/database';
 // Import all models for explicit sync
-import { User, Category, Expense, Budget, AccessLog, PasswordReset } from './models';
+// import { User, Category, Expense, Budget, AccessLog, PasswordReset } from './models';
 
 dotenv.config();
 
@@ -26,7 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Logging middleware
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });

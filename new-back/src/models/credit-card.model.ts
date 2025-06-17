@@ -8,7 +8,7 @@ class CreditCard extends Model<ICreditCard> implements ICreditCard {
   public user_id!: number;
   public card_number!: string;
   public card_holder_name!: string;
-  public expiration_date!: Date;
+  public expiration_date!: Date | null;
   public brand!: string;
   public bank!: string;
   public is_active!: boolean;

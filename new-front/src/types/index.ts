@@ -1,9 +1,9 @@
 // Auth Types
 export interface User {
   id: number;
-  username: string;
+  name: string;
   email: string;
-  password?: string;
+  password_hash?: string;
   role_id: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -34,8 +34,8 @@ export interface CategoryState {
 export interface Budget {
   id: number;
   user_id: number;
-  category_id: number;
   monthly_budget: number;
+  category_id: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -51,12 +51,13 @@ export interface BudgetState {
 export interface Expense {
   id: number;
   user_id: number;
-  category_id: number;
+  date: Date;
   amount: number;
   description: string;
-  date: string;
   recurring: boolean;
+  category_id?: number | null;
   credit_card_id?: number;
+  transaction_type: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -73,9 +74,14 @@ export interface Card {
   id: number;
   user_id: number;
   card_number: string;
-  expiry_date: string;
   card_holder_name: string;
-  // Add other card properties as needed
+  expiration_date?: Date | null;
+  brand: string;
+  bank: string;
+  is_active: boolean;
+  created_at: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Root State Type
@@ -92,7 +98,7 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  username: string;
+  name: string;
   email: string;
   password: string;
 }

@@ -59,9 +59,10 @@ export class CategoryController {
     }
   }
 
-  async getCategories(req: Request, res: Response): Promise<void> {
+  async getCategories(_req: Request, res: Response): Promise<void> {
     try {
       const categories = await this.categoryService.getAllCategories();
+      console.log('Categories fetched by backend:', categories);
       res.status(200).json({ categories });
     } catch (error: any) {
       res.status(400).json({

@@ -56,7 +56,7 @@ class CategoryController {
             });
         }
     }
-    async getCategories(req, res) {
+    async getCategories(_req, res) {
         try {
             const categories = await this.categoryService.getAllCategories();
             res.status(200).json({ categories });

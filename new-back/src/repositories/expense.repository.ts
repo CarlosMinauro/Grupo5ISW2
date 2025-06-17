@@ -1,9 +1,8 @@
 import { BaseRepository } from './base.repository';
 import Expense from '../models/expense.model';
-import { IExpense } from '../interfaces/models';
 import { Op, Sequelize } from 'sequelize';
 import Category from '../models/category.model';
-import CreditCard from '../models/creditCard.model';
+import CreditCard from '../models/credit-card.model';
 
 export class ExpenseRepository extends BaseRepository<Expense> {
   constructor() {
@@ -12,11 +11,18 @@ export class ExpenseRepository extends BaseRepository<Expense> {
 
   async findByUserId(userId: number, creditCardId?: number): Promise<Expense[]> {
     console.log('Buscando gastos para usuario:', userId, creditCardId ? `y tarjeta ${creditCardId}` : '');
-    const where: any = { user_id: userId };
-    if (creditCardId) {
-      where.credit_card_id = creditCardId;
+    
+    if (!creditCardId) {
+      throw new Error('El ID de la tarjeta es requerido');
     }
+    
+    const where: any = { 
+      user_id: userId,
+      credit_card_id: creditCardId
+    };
+    
     console.log('Condiciones de búsqueda:', where);
+    
     const expenses = await this.model.findAll({
       where,
       include: [
@@ -31,12 +37,27 @@ export class ExpenseRepository extends BaseRepository<Expense> {
       ],
       order: [['date', 'DESC']]
     });
+    
     console.log('Gastos encontrados:', expenses.length);
+    console.log('Detalle de gastos:', JSON.stringify(expenses, null, 2));
+    
     return expenses;
   }
 
   async findByCategoryId(categoryId: number): Promise<Expense[]> {
-    return this.findBy({ category_id: categoryId } as Partial<IExpense>);
+    return this.model.findAll({
+      where: { category_id: categoryId },
+      include: [
+        {
+          model: Category,
+          attributes: ['id', 'name']
+        },
+        {
+          model: CreditCard,
+          attributes: ['id', 'card_number', 'brand']
+        }
+      ]
+    });
   }
 
   async findByDateRange(userId: number, startDate: Date, endDate: Date): Promise<Expense[]> {
@@ -47,7 +68,16 @@ export class ExpenseRepository extends BaseRepository<Expense> {
           [Op.between]: [startDate, endDate],
         },
       },
-      include: ['Category'],
+      include: [
+        {
+          model: Category,
+          attributes: ['id', 'name']
+        },
+        {
+          model: CreditCard,
+          attributes: ['id', 'card_number', 'brand']
+        }
+      ]
     });
   }
 
@@ -64,7 +94,12 @@ export class ExpenseRepository extends BaseRepository<Expense> {
         },
       },
       group: ['category_id'],
-      include: ['Category'],
+      include: [
+        {
+          model: Category,
+          attributes: ['id', 'name']
+        }
+      ]
     });
   }
 } 

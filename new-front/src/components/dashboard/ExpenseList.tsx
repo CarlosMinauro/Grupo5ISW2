@@ -1,5 +1,7 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../hooks/useAppSelector';
+import { Expense } from '../../types';
+import { formatDate } from '../../utils/formatters';
 import {
   Typography,
   Box,
@@ -11,23 +13,18 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
-import { RootState } from '../../store';
 
-const ExpenseList: React.FC = () => {
-  const { expenses } = useSelector((state: RootState) => state.expenses);
-  const { categories } = useSelector((state: RootState) => state.categories);
+interface ExpenseListProps {
+  expenses: Expense[];
+}
 
-  const getCategoryName = (categoryId: number) => {
-    const category = categories.find(cat => cat.id === categoryId);
+export const ExpenseList: React.FC<ExpenseListProps> = ({ expenses }) => {
+  const categories = useAppSelector(state => state.categories.categories);
+
+  const getCategoryName = (categoryId: number | null | undefined): string => {
+    if (!categoryId) return 'Sin categoría';
+    const category = categories.find(c => c.id === categoryId);
     return category ? category.name : 'Sin categoría';
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
   };
 
   const sortedExpenses = [...expenses].sort((a, b) => 
@@ -72,6 +69,4 @@ const ExpenseList: React.FC = () => {
       </TableContainer>
     </Box>
   );
-};
-
-export default ExpenseList; 
+}; 

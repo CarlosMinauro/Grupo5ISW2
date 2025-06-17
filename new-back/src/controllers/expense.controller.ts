@@ -4,10 +4,18 @@ import { IExpense } from '../interfaces/models';
 import { validationResult } from 'express-validator';
 
 export class ExpenseController {
+  private static instance: ExpenseController;
   private expenseService: ExpenseService;
 
-  constructor() {
-    this.expenseService = new ExpenseService();
+  private constructor() {
+    this.expenseService = ExpenseService.getInstance();
+  }
+
+  public static getInstance(): ExpenseController {
+    if (!ExpenseController.instance) {
+      ExpenseController.instance = new ExpenseController();
+    }
+    return ExpenseController.instance;
   }
 
   async createExpense(req: Request, res: Response): Promise<void> {
@@ -30,6 +38,32 @@ export class ExpenseController {
     }
   }
 
+  async getExpenses(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = (req as any).user.id;
+      const creditCardId = req.query.credit_card_id ? Number(req.query.credit_card_id) : undefined;
+      
+      if (!creditCardId) {
+        res.status(400).json({ message: 'El ID de la tarjeta es requerido' });
+        return;
+      }
+
+      console.log('Obteniendo gastos para usuario:', userId, `y tarjeta ${creditCardId}`);
+      console.log('Query params:', req.query);
+      
+      const expenses = await this.expenseService.getExpensesByUser(userId, creditCardId);
+      console.log('Gastos encontrados:', expenses.length);
+      console.log('Detalle de gastos:', JSON.stringify(expenses, null, 2));
+      
+      res.status(200).json({ expenses });
+    } catch (error: any) {
+      console.error('Error al obtener gastos:', error);
+      res.status(500).json({
+        message: error.message || 'Error fetching expenses',
+      });
+    }
+  }
+
   async updateExpense(req: Request, res: Response): Promise<void> {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -39,15 +73,18 @@ export class ExpenseController {
 
     try {
       const { id } = req.params;
-      const expense = await this.expenseService.updateExpense(Number(id), req.body);
-      if (!expense) {
-        res.status(404).json({ message: 'Expense not found' });
-        return;
+      const expenseData = req.body;
+      const expense = await this.expenseService.updateExpense(Number(id), expenseData);
+      if (expense) {
+        res.status(200).json({
+          message: 'Expense updated successfully',
+          expense,
+        });
+      } else {
+        res.status(404).json({
+          message: 'Expense not found',
+        });
       }
-      res.status(200).json({
-        message: 'Expense updated successfully',
-        expense,
-      });
     } catch (error: any) {
       res.status(400).json({
         message: error.message || 'Error updating expense',
@@ -59,32 +96,18 @@ export class ExpenseController {
     try {
       const { id } = req.params;
       const success = await this.expenseService.deleteExpense(Number(id));
-      if (!success) {
-        res.status(404).json({ message: 'Expense not found' });
-        return;
+      if (success) {
+        res.status(200).json({
+          message: 'Expense deleted successfully',
+        });
+      } else {
+        res.status(404).json({
+          message: 'Expense not found',
+        });
       }
-      res.status(200).json({ message: 'Expense deleted successfully' });
     } catch (error: any) {
       res.status(400).json({
         message: error.message || 'Error deleting expense',
-      });
-    }
-  }
-
-  async getExpenses(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = (req as any).user.id;
-      const creditCardId = req.query.creditCardId ? Number(req.query.creditCardId) : undefined;
-      console.log('Obteniendo gastos para usuario:', userId, creditCardId ? `y tarjeta ${creditCardId}` : '');
-      console.log('Query params:', req.query);
-      const expenses = await this.expenseService.getExpensesByUser(userId, creditCardId);
-      console.log('Gastos encontrados:', expenses.length);
-      console.log('Detalle de gastos:', JSON.stringify(expenses, null, 2));
-      res.status(200).json({ expenses });
-    } catch (error: any) {
-      console.error('Error al obtener gastos:', error);
-      res.status(500).json({
-        message: error.message || 'Error fetching expenses',
       });
     }
   }

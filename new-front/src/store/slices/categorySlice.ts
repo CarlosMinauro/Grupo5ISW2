@@ -5,8 +5,6 @@ import { RootState } from '../index';
 export interface Category {
   id: number;
   name: string;
-  description: string;
-  user_id: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -87,7 +85,7 @@ const categorySlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload;
+        state.categories = action.payload.categories;
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.loading = false;

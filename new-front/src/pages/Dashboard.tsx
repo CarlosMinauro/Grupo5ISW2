@@ -24,6 +24,7 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { logout } from '../store/slices/authSlice';
+import { fetchCategories } from '../store/slices/categorySlice';
 import {
   Container,
   Grid,
@@ -34,7 +35,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { expenseService, budgetService, categoryService } from '../services/api';
+import { expenseService, budgetService } from '../services/api';
 import ExpenseList from '../components/expenses/ExpenseList';
 import BudgetList from '../components/budgets/BudgetList';
 import AddExpenseForm from '../components/expenses/AddExpenseForm';
@@ -47,11 +48,11 @@ const Dashboard: React.FC = () => {
   const { creditCardId } = useParams<{ creditCardId: string }>();
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const categories = useSelector((state: RootState) => state.categories.categories);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [openAddExpense, setOpenAddExpense] = useState(false);
   const [openAddBudget, setOpenAddBudget] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
@@ -71,21 +72,22 @@ const Dashboard: React.FC = () => {
         setError(null);
         console.log('Fetching data for card:', currentCardId);
 
-        const [expensesRes, budgetsRes, categoriesRes] = await Promise.all([
+        dispatch(fetchCategories() as any);
+
+        const [expensesRes, budgetsRes] = await Promise.all([
           expenseService.getExpenses(currentCardId),
           budgetService.getBudgets(),
-          categoryService.getCategories()
         ]);
 
         console.log('Data fetched:', {
           expenses: expensesRes.data.length,
           budgets: budgetsRes.data.length,
-          categories: categoriesRes.data.length
+          categories: categories.length
         });
+        console.log('Categories from Redux state (after fetchCategories dispatch):', categories);
 
         setExpenses(expensesRes.data);
         setBudgets(budgetsRes.data);
-        setCategories(categoriesRes.data);
       } catch (err: any) {
         console.error('Error fetching data:', err);
         setError(err.response?.data?.message || 'Error al cargar los datos');
@@ -95,19 +97,20 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-  }, [isAuthenticated, user, navigate, currentCardId]);
+  }, [isAuthenticated, user, navigate, currentCardId, dispatch]);
 
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
   };
 
-  const handleAddExpense = async (expenseData: Omit<Expense, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleAddExpense = async (expenseData: Partial<Expense>) => {
     try {
       const response = await expenseService.createExpense({ 
         ...expenseData, 
         user_id: user?.id || 0,
-        credit_card_id: currentCardId
+        credit_card_id: currentCardId,
+        date: expenseData.date instanceof Date ? expenseData.date : new Date(expenseData.date || new Date())
       });
       if (response.success && response.data) {
         setExpenses(prev => {
@@ -126,10 +129,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleEditExpense = async (expenseData: Expense) => {
+  const handleEditExpense = async (expenseData: Partial<Expense>) => {
     try {
-      const response = await expenseService.updateExpense(expenseData.id, expenseData);
-       if (response.success && response.data) {
+      if (!expenseData.id) return;
+      const response = await expenseService.updateExpense(expenseData.id, {
+        ...expenseData,
+        date: expenseData.date instanceof Date ? expenseData.date : new Date(expenseData.date || new Date())
+      });
+      if (response.success && response.data) {
         setExpenses(prev => prev.map(exp => exp.id === expenseData.id ? response.data : exp));
         setOpenAddExpense(false);
         setSelectedExpense(null);
@@ -193,9 +200,9 @@ const Dashboard: React.FC = () => {
 
    const handleEditBudget = async (budgetData: Budget) => {
     try {
+      if (!budgetData.id) return;
       const response = await budgetService.updateBudget(budgetData.id, budgetData);
       if (response.success && response.data) {
-        // Update the specific budget in the state instead of re-fetching all budgets
         setBudgets(prev => prev.map(bud => bud.id === budgetData.id ? response.data : bud));
         setOpenAddBudget(false);
         setSelectedBudget(null);
@@ -210,29 +217,14 @@ const Dashboard: React.FC = () => {
 
   const handleDeleteBudget = async (id: number) => {
     try {
-      console.log('Iniciando eliminación de presupuesto:', id);
       const response = await budgetService.deleteBudget(id);
-      console.log('Respuesta del servidor:', response);
       if (response.success) {
-        console.log('Presupuesto eliminado exitosamente');
-        setBudgets(prev => {
-          console.log('Estado anterior de presupuestos:', prev);
-          const newBudgets = prev.filter(budget => budget.id !== id);
-          console.log('Nuevo estado de presupuestos:', newBudgets);
-          return newBudgets.sort((a, b) => {
-            const categoryA = categories.find(cat => cat.id === a.category_id)?.name || '';
-            const categoryB = categories.find(cat => cat.id === b.category_id)?.name || '';
-            return categoryA.localeCompare(categoryB);
-          });
-        });
+        setBudgets(prev => prev.filter(budget => budget.id !== id));
         setRenderKey(prev => prev + 1);
-        setError(null);
       } else {
-        console.error('Error en la respuesta del servidor:', response.message);
         setError(response.message || 'Failed to delete budget');
       }
     } catch (err: any) {
-      console.error('Error al eliminar presupuesto:', err);
       setError(err.response?.data?.message || 'Error al eliminar el presupuesto');
     }
   };
@@ -243,8 +235,13 @@ const Dashboard: React.FC = () => {
   };
 
   const handleCloseAddExpense = () => {
-    setSelectedExpense(null);
     setOpenAddExpense(false);
+    setSelectedExpense(null);
+  };
+
+  const handleOpenEditExpense = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setOpenAddExpense(true);
   };
 
   const handleOpenAddBudget = () => {
@@ -253,13 +250,14 @@ const Dashboard: React.FC = () => {
   };
 
   const handleCloseAddBudget = () => {
-    setSelectedBudget(null);
     setOpenAddBudget(false);
+    setSelectedBudget(null);
   };
 
-  if (!isAuthenticated || !user) {
-    return null;
-  }
+  const handleOpenEditBudget = (budget: Budget) => {
+    setSelectedBudget(budget);
+    setOpenAddBudget(true);
+  };
 
   if (loading) {
     return (
@@ -269,9 +267,17 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <Container>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 4 }}>
+    <Container>
+      <Box sx={{ flexGrow: 1, p: 3 }}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -300,74 +306,56 @@ const Dashboard: React.FC = () => {
             </Grid>
           )}
 
-          {/* Botones para abrir los formularios de agregar */}
           <Grid item xs={12} md={6}>
-             <Button variant="contained" onClick={handleOpenAddExpense} sx={{ mb: 2 }}>
-              Agregar Gasto
-            </Button>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6" component="h2">Movimientos Recientes</Typography>
+              <Button variant="contained" onClick={handleOpenAddExpense} sx={{ mb: 2 }}>
+                Agregar Movimiento
+              </Button>
+            </Box>
             <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Gastos Recientes
-              </Typography>
               <ExpenseList
                 key={renderKey}
                 expenses={expenses}
                 categories={categories}
-                onEdit={(expense) => {
-                  setSelectedExpense(expense);
-                  setOpenAddExpense(true);
-                }}
+                onEdit={handleOpenEditExpense}
                 onDelete={handleDeleteExpense}
-               />
+              />
             </Paper>
           </Grid>
-
           <Grid item xs={12} md={6}>
-             <Button variant="contained" onClick={handleOpenAddBudget} sx={{ mb: 2 }}>
+            <Button variant="contained" onClick={handleOpenAddBudget} sx={{ mb: 2 }}>
               Agregar Presupuesto
             </Button>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
                 Presupuestos
               </Typography>
-              <BudgetList
-                key={`${renderKey}-${budgets.length}-${expenses.length}`}
-                budgets={budgets}
-                expenses={expenses}
-                categories={categories}
-                onEdit={(budget) => {
-                  setSelectedBudget(budget);
-                  setOpenAddBudget(true);
-                }}
-                onDelete={handleDeleteBudget}
-               />
+              <BudgetList budgets={budgets} expenses={expenses} categories={categories} onEdit={handleOpenEditBudget} onDelete={handleDeleteBudget} />
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>Account Status</Typography>
+              <AccountStatus creditCardId={currentCardId} />
             </Paper>
           </Grid>
         </Grid>
-      </Box>
 
-      <AddExpenseForm
-        open={openAddExpense}
-        onClose={handleCloseAddExpense}
-        onSubmit={selectedExpense ? handleEditExpense : handleAddExpense}
-        selectedExpense={selectedExpense}
-        categories={categories}
-        userId={user.id}
-      />
-      <AddBudgetForm
-        open={openAddBudget}
-        onClose={handleCloseAddBudget}
-        onSubmit={selectedBudget ? handleEditBudget : handleAddBudget}
-        selectedBudget={selectedBudget}
-        categories={categories}
-        userId={user.id}
-      />
-
-      <Box py={4}>
-        <Typography variant="h4" gutterBottom>
-          Account Status
-        </Typography>
-        <AccountStatus creditCardId={currentCardId} />
+        <AddExpenseForm
+          open={openAddExpense}
+          onClose={handleCloseAddExpense}
+          onSubmit={selectedExpense ? handleEditExpense : handleAddExpense}
+          selectedExpense={selectedExpense || undefined}
+        />
+        <AddBudgetForm
+          open={openAddBudget}
+          onClose={handleCloseAddBudget}
+          onSubmit={selectedBudget ? handleEditBudget : handleAddBudget}
+          selectedBudget={selectedBudget}
+          categories={categories}
+          userId={user.id}
+        />
       </Box>
     </Container>
   );

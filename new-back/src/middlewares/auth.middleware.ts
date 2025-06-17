@@ -18,8 +18,9 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       }
 
       (req as any).user = user;
-      next();
+      return next();
     });
+    return;
   } catch (error) {
     console.error('Authentication middleware error:', error);
     return res.status(500).json({ message: 'Error en la autenticación' });

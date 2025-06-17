@@ -1,101 +1,30 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchCategories } from '../../store/slices/categorySlice';
-import { fetchExpenses } from '../../store/slices/expenseSlice';
-import { Category, Expense } from '../../types';
-import { RootState, AppDispatch } from '../../store';
-import {
-  Box,
-  Paper,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  LinearProgress,
-  CircularProgress,
-} from '@mui/material';
-import { formatCurrency } from '../../utils/formatters';
+import React from 'react';
+import { useAppSelector } from '../../hooks/useAppSelector';
+import { Expense } from '../../types';
 
-interface CategoryWithTotal extends Category {
-  total: number;
+interface CategorySummaryProps {
+  categoryId: number;
 }
 
-const CategorySummary: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { categories, loading: categoriesLoading } = useSelector((state: RootState) => state.categories);
-  const { expenses, loading: expensesLoading } = useSelector((state: RootState) => state.expenses);
+export const CategorySummary: React.FC<CategorySummaryProps> = ({ categoryId }) => {
+  const expenses = useAppSelector(state => state.expenses.expenses);
+  const category = useAppSelector(state => 
+    state.categories.categories.find(c => c.id === categoryId)
+  );
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([
-          dispatch(fetchCategories()),
-          dispatch(fetchExpenses())
-        ]);
-      } catch (error) {
-        console.error('Error loading categories:', error);
-      }
-    };
+  const categoryExpenses = expenses.filter(expense => 
+    expense.category_id === categoryId && expense.transaction_type === 'expense'
+  );
 
-    loadData();
-  }, [dispatch]);
+  const totalExpenses = categoryExpenses.reduce((total, expense) => total + expense.amount, 0);
 
-  const calculateCategoryTotal = (categoryId: number): number => {
-    return expenses
-      .filter((expense: Expense) => expense.category_id === categoryId)
-      .reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
-  };
-
-  const getTopCategories = (): CategoryWithTotal[] => {
-    return categories
-      .map((category: Category) => ({
-        ...category,
-        total: calculateCategoryTotal(category.id)
-      }))
-      .sort((a: CategoryWithTotal, b: CategoryWithTotal) => b.total - a.total)
-      .slice(0, 5);
-  };
-
-  if (categoriesLoading || expensesLoading) {
-    return (
-      <Box display="flex" justifyContent="center" p={3}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  const topCategories = getTopCategories();
-  const totalExpenses = expenses.reduce((sum: number, expense: Expense) => sum + expense.amount, 0);
+  if (!category) return null;
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Category Summary
-      </Typography>
-      <Paper>
-        <List>
-          {topCategories.map((category: CategoryWithTotal) => {
-            const percentage = totalExpenses > 0 ? (category.total / totalExpenses) * 100 : 0;
-            return (
-              <React.Fragment key={category.id}>
-                <ListItem>
-                  <ListItemText
-                    primary={category.name}
-                    secondary={`${formatCurrency(category.total)} (${percentage.toFixed(1)}%)`}
-                  />
-                </ListItem>
-                <LinearProgress
-                  variant="determinate"
-                  value={percentage}
-                  sx={{ mx: 2, mb: 1 }}
-                />
-              </React.Fragment>
-            );
-          })}
-        </List>
-      </Paper>
-    </Box>
+    <div className="category-summary">
+      <h3>{category.name}</h3>
+      <p>Total Expenses: ${totalExpenses.toFixed(2)}</p>
+      <p>Number of Expenses: {categoryExpenses.length}</p>
+    </div>
   );
-};
-
-export default CategorySummary; 
+}; 

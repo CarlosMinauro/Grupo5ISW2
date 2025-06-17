@@ -30,7 +30,7 @@ interface ExpenseListProps {
 
 const ExpenseList: React.FC<ExpenseListProps> = ({
   expenses = [],
-  categories = [],
+  categories: propCategories = [],
   onEdit,
   onDelete,
   loading = false,
@@ -38,7 +38,10 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
 
-  const getCategoryName = (categoryId: number): string => {
+  const categories = Array.isArray(propCategories) ? propCategories : [];
+
+  const getCategoryName = (categoryId: number | null | undefined): string => {
+    if (categoryId == null) return 'Sin categoría';
     const category = categories.find((cat: Category) => cat.id === categoryId);
     return category ? category.name : 'Unknown';
   };
@@ -78,6 +81,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
               <TableCell>Date</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Description</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell align="right">Amount</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -89,6 +93,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                   <TableCell>{formatDate(expense.date)}</TableCell>
                   <TableCell>{getCategoryName(expense.category_id)}</TableCell>
                   <TableCell>{expense.description}</TableCell>
+                  <TableCell>{expense.transaction_type}</TableCell>
                   <TableCell align="right">{formatCurrency(expense.amount)}</TableCell>
                   <TableCell>
                     {onEdit && <Button onClick={() => onEdit(expense)}>Edit</Button>}

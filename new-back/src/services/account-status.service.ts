@@ -33,54 +33,58 @@ export class AccountStatusService {
         throw new Error('Mes inválido');
       }
 
+      if (!creditCardId) {
+        throw new Error('El ID de la tarjeta es requerido');
+      }
+
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
-      console.log('Buscando gastos entre:', startDate, 'y', endDate);
-
-      const expenseWhere: any = {
-        user_id: userId,
-        date: {
-          [Op.between]: [startDate, endDate]
-        }
-      };
-      if (creditCardId) {
-        expenseWhere.credit_card_id = creditCardId;
-      }
+      console.log('AccountStatusService: Attempting to fetch expenses between:', startDate, 'and', endDate);
+      console.log('AccountStatusService: For user:', userId, 'and credit card:', creditCardId);
 
       const expenses = await Expense.findAll({
-        where: expenseWhere,
+        where: {
+          user_id: userId,
+          credit_card_id: creditCardId,
+          date: {
+            [Op.between]: [startDate, endDate]
+          }
+        },
         include: [{
           model: Category,
           attributes: ['id', 'name']
         }]
       });
 
-      console.log('Gastos encontrados:', expenses.length);
+      console.log('AccountStatusService: Expenses found:', expenses.length);
 
       const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
       
       // Fetch all budgets for the user
-      console.log('Fetching all budgets for user:', userId);
+      console.log('AccountStatusService: Attempting to fetch budgets for user:', userId);
       const budgets = await Budget.findAll({
         where: {
           user_id: userId,
         },
       });
 
-      console.log('Presupuestos encontrados:', budgets.length);
-      console.log('Presupuestos data:', JSON.stringify(budgets));
+      console.log('AccountStatusService: Budgets found:', budgets.length);
+      console.log('AccountStatusService: Budgets data:', JSON.stringify(budgets));
 
       // Sum the monthly_budget for all fetched budgets
       const totalBudget = budgets.reduce((sum, budget) => sum + Number(budget.monthly_budget), 0);
 
-      console.log('Total presupuesto calculado:', totalBudget);
+      console.log('AccountStatusService: Total budget calculated:', totalBudget);
 
       // Assign totalBudget to totalIncome
       const totalIncome = totalBudget;
 
+      console.log('AccountStatusService: Processing expenses by category');
       const expensesByCategory = expenses.reduce((acc, expense) => {
-        const categoryId = expense.Category.id;
+        const categoryId = expense.Category?.id || 0; // Default to 0 or a special ID for uncategorized
+        const categoryName = expense.Category?.name || 'Uncategorized';
+        
         const existingCategory = acc.find(cat => cat.categoryId === categoryId);
 
         if (existingCategory) {
@@ -88,7 +92,7 @@ export class AccountStatusService {
         } else {
           acc.push({
             categoryId,
-            categoryName: expense.Category.name,
+            categoryName,
             amount: Number(expense.amount)
           });
         }

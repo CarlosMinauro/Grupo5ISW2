@@ -11,17 +11,22 @@ class AccountStatusService {
         }
         return AccountStatusService.instance;
     }
-    async getMonthlyStatus(month, year, userId) {
+    async getMonthlyStatus(month, year, userId, creditCardId) {
         try {
             if (month < 1 || month > 12) {
                 throw new Error('Mes inválido');
             }
+            if (!creditCardId) {
+                throw new Error('El ID de la tarjeta es requerido');
+            }
             const startDate = new Date(year, month - 1, 1);
             const endDate = new Date(year, month, 0, 23, 59, 59, 999);
             console.log('Buscando gastos entre:', startDate, 'y', endDate);
+            console.log('Para usuario:', userId, 'y tarjeta:', creditCardId);
             const expenses = await models_1.Expense.findAll({
                 where: {
                     user_id: userId,
+                    credit_card_id: creditCardId,
                     date: {
                         [sequelize_1.Op.between]: [startDate, endDate]
                     }

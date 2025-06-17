@@ -43,7 +43,7 @@ Expense.init({
     },
     category_id: {
         type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
             model: category_model_1.default,
             key: 'id',
