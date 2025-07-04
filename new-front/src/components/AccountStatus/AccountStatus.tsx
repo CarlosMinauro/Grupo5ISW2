@@ -103,6 +103,10 @@ const AccountStatus: React.FC<AccountStatusProps> = ({ creditCardId }) => {
         </Grid>
       </Grid>
 
+      <Box mt={4} mb={2}>
+        <hr style={{ border: 'none', borderTop: '2px solid #eee', margin: 0 }} />
+      </Box>
+
       {status && (
         <Box mt={3}>
           <Grid container spacing={3}>
@@ -110,10 +114,10 @@ const AccountStatus: React.FC<AccountStatusProps> = ({ creditCardId }) => {
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    Presupuesto Total
+                    Total Pagado
                   </Typography>
                   <Typography variant="h4" color="primary">
-                    ${(status.totalIncome ?? 0).toFixed(2)}
+                    ${(status.totalPaid ?? 0).toFixed(2)}
                   </Typography>
                 </CardContent>
               </Card>

@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CardSelection from './pages/CardSelection';
 import AddCard from './pages/AddCard';
+import EditProfilePage from './pages/EditProfile';
 
 // Configure future flags for React Router v7
 const router = {
@@ -84,6 +85,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <AddCard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editar-perfil"
+            element={
+              <ProtectedRoute>
+                <EditProfilePage />
               </ProtectedRoute>
             }
           />

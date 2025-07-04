@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { RootState } from '../index';
+import { API_URL } from '../../config';
 
 export interface Budget {
   id: number;
@@ -29,7 +30,7 @@ export const fetchBudgets = createAsyncThunk(
   'budgets/fetchBudgets',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/budgets`);
+      const response = await axios.get(`${API_URL}/budgets`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Error al cargar presupuestos');
@@ -41,7 +42,7 @@ export const createBudget = createAsyncThunk(
   'budgets/createBudget',
   async (budget: Omit<Budget, 'id' | 'createdAt' | 'updatedAt'>, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/budgets`, budget);
+      const response = await axios.post(`${API_URL}/budgets`, budget);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Error al crear presupuesto');
@@ -53,7 +54,7 @@ export const updateBudget = createAsyncThunk(
   'budgets/updateBudget',
   async ({ id, ...budget }: Budget, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API_URL}/budgets/${id}`, budget);
+      const response = await axios.put(`${API_URL}/budgets/${id}`, budget);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Error al actualizar presupuesto');
@@ -65,7 +66,7 @@ export const deleteBudget = createAsyncThunk(
   'budgets/deleteBudget',
   async (id: number, { rejectWithValue }) => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/budgets/${id}`);
+      await axios.delete(`${API_URL}/budgets/${id}`);
       return id;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Error al eliminar presupuesto');

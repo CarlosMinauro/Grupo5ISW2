@@ -15,6 +15,7 @@ export interface IUser {
   name: string;
   email: string;
   role_id: number;
+  password_hash?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -61,4 +62,28 @@ export interface IAccessLog {
   ip_address: string;
   user_agent: string;
   created_at: Date;
+}
+
+export interface Card {
+  id: number;
+  user_id: number;
+  card_number: string;
+  card_holder_name: string;
+  expiration_date: Date | null;
+  brand: string;
+  bank: string;
+  is_active: boolean;
+  created_at: Date;
+  cut_off_date: Date | null;
+  payment_due_date: Date | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface IAdditionalUser {
+  id: number;
+  name: string;
+  email: string;
+  role_id: number;
+  parent_user_id: number;
 } 

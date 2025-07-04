@@ -8,6 +8,7 @@ import budgetRoutes from './routes/budget.routes';
 import categoryRoutes from './routes/category.routes';
 import accountStatusRoutes from './routes/account-status.routes';
 import creditCardRoutes from './routes/credit-card.routes';
+import userRoutes from './routes/user.routes';
 import sequelize from './config/database';
 // Import all models for explicit sync
 // import { User, Category, Expense, Budget, AccessLog, PasswordReset } from './models';
@@ -38,6 +39,7 @@ app.use('/api/budgets', budgetRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/account-status', accountStatusRoutes);
 app.use('/api/cards', creditCardRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -74,4 +76,7 @@ async function startServer() {
   }
 }
 
-startServer(); 
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
+export { app }; 

@@ -37,7 +37,15 @@ User.init({
             model: role_model_1.default,
             key: 'id',
         },
-    }
+    },
+    parent_user_id: {
+        type: sequelize_1.DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Usuario',
+            key: 'id',
+        },
+    },
 }, {
     sequelize: database_1.default,
     tableName: 'Usuario',

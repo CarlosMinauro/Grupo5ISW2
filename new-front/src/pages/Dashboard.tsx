@@ -42,6 +42,9 @@ import AddExpenseForm from '../components/expenses/AddExpenseForm';
 import AddBudgetForm from '../components/budgets/AddBudgetForm';
 import { Expense, Budget, Category } from '../types';
 import AccountStatus from '../components/AccountStatus/AccountStatus';
+import EditProfile from '../components/users/EditProfile';
+import AdditionalUsers from '../components/users/AdditionalUsers';
+import MontoPorVencer from '../components/AccountStatus/MontoPorVencer';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -261,8 +264,9 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
         <CircularProgress />
+        <Typography sx={{ ml: 2 }}>Cargando datos...</Typography>
       </Box>
     );
   }
@@ -278,42 +282,31 @@ const Dashboard: React.FC = () => {
   return (
     <Container>
       <Box sx={{ flexGrow: 1, p: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Typography variant="h4">
-                Dashboard
-              </Typography>
-              <Box>
-                <Button 
-                  variant="outlined" 
-                  color="primary" 
-                  onClick={() => navigate('/card-selection')}
-                  sx={{ mr: 2 }}
-                >
-                  Cambiar Tarjeta
-                </Button>
-                <Button variant="outlined" color="primary" onClick={handleLogout}>
-                  Logout
+        <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3, mt: 1 }}>
+          <Typography variant="h4">Dashboard</Typography>
+          <Box display="flex" alignItems="center">
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              onClick={() => navigate('/card-selection')}
+              sx={{ mr: 2, mb: 0 }}
+            >
+              Cambiar Tarjeta
+            </Button>
+            <Button onClick={handleLogout} color="secondary" variant="outlined" sx={{ mb: 0 }}>
+              Cerrar sesión
+            </Button>
+          </Box>
+        </Box>
+        <Grid container spacing={3} alignItems="flex-start">
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 2, minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h6" component="h2">Movimientos Recientes</Typography>
+                <Button variant="contained" onClick={handleOpenAddExpense}>
+                  Agregar Gasto
                 </Button>
               </Box>
-            </Box>
-          </Grid>
-
-          {error && (
-            <Grid item xs={12}>
-              <Alert severity="error">{error}</Alert>
-            </Grid>
-          )}
-
-          <Grid item xs={12} md={6}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" component="h2">Movimientos Recientes</Typography>
-              <Button variant="contained" onClick={handleOpenAddExpense} sx={{ mb: 2 }}>
-                Agregar Movimiento
-              </Button>
-            </Box>
-            <Paper sx={{ p: 2 }}>
               <ExpenseList
                 key={renderKey}
                 expenses={expenses}
@@ -324,39 +317,39 @@ const Dashboard: React.FC = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Button variant="contained" onClick={handleOpenAddBudget} sx={{ mb: 2 }}>
-              Agregar Presupuesto
-            </Button>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Presupuestos
-              </Typography>
-              <BudgetList budgets={budgets} expenses={expenses} categories={categories} onEdit={handleOpenEditBudget} onDelete={handleDeleteBudget} />
-            </Paper>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>Account Status</Typography>
-              <AccountStatus creditCardId={currentCardId} />
+            <Paper sx={{ p: 2, minHeight: 340, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+              <MontoPorVencer />
             </Paper>
           </Grid>
         </Grid>
-
-        <AddExpenseForm
-          open={openAddExpense}
-          onClose={handleCloseAddExpense}
-          onSubmit={selectedExpense ? handleEditExpense : handleAddExpense}
-          selectedExpense={selectedExpense || undefined}
-        />
-        <AddBudgetForm
-          open={openAddBudget}
-          onClose={handleCloseAddBudget}
-          onSubmit={selectedBudget ? handleEditBudget : handleAddBudget}
-          selectedBudget={selectedBudget}
-          categories={categories}
-          userId={user.id}
-        />
+        <Box mt={5} />
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>Account Status</Typography>
+            <AccountStatus creditCardId={currentCardId} key={renderKey} />
+          </Paper>
+        </Grid>
       </Box>
+      <Box mt={4}>
+        <Typography variant="h5" gutterBottom>Configuración</Typography>
+        <EditProfile />
+      </Box>
+      <AdditionalUsers />
+
+      <AddExpenseForm
+        open={openAddExpense}
+        onClose={handleCloseAddExpense}
+        onSubmit={selectedExpense ? handleEditExpense : handleAddExpense}
+        selectedExpense={selectedExpense || undefined}
+      />
+      <AddBudgetForm
+        open={openAddBudget}
+        onClose={handleCloseAddBudget}
+        onSubmit={selectedBudget ? handleEditBudget : handleAddBudget}
+        selectedBudget={selectedBudget}
+        categories={categories}
+        userId={user.id}
+      />
     </Container>
   );
 };

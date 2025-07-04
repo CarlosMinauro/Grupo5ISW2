@@ -4,6 +4,7 @@ export interface IUser {
   email: string;
   password_hash: string;
   role_id: number;
+  parent_user_id?: number | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -42,7 +43,7 @@ export interface IExpense {
   description: string;
   recurring: boolean;
   category_id?: number | null;
-  credit_card_id?: number;
+  credit_card_id?: number | null;
   transaction_type: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -74,6 +75,8 @@ export interface ICreditCard {
   bank: string;
   is_active: boolean;
   created_at: Date;
+  cut_off_date?: Date | null;
+  payment_due_date?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
 } 

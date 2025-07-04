@@ -1,7 +1,6 @@
 import { api } from './api';
-import { Card, ApiResponse } from '../types';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+import { Card } from '../interfaces/models';
+import { ApiResponse } from '../types';
 
 export const cardService = {
   getCards: async (): Promise<ApiResponse<Card[]>> => {
@@ -40,6 +39,8 @@ export const cardService = {
         bank: String(response.data.card.bank),
         is_active: Boolean(response.data.card.is_active),
         created_at: new Date(response.data.card.created_at),
+        cut_off_date: response.data.card.cut_off_date ? new Date(response.data.card.cut_off_date) : null,
+        payment_due_date: response.data.card.payment_due_date ? new Date(response.data.card.payment_due_date) : null,
         createdAt: response.data.card.createdAt ? new Date(response.data.card.createdAt) : undefined,
         updatedAt: response.data.card.updatedAt ? new Date(response.data.card.updatedAt) : undefined,
       }
@@ -61,6 +62,8 @@ export const cardService = {
         bank: String(response.data.card.bank),
         is_active: Boolean(response.data.card.is_active),
         created_at: new Date(response.data.card.created_at),
+        cut_off_date: response.data.card.cut_off_date ? new Date(response.data.card.cut_off_date) : null,
+        payment_due_date: response.data.card.payment_due_date ? new Date(response.data.card.payment_due_date) : null,
         createdAt: response.data.card.createdAt ? new Date(response.data.card.createdAt) : undefined,
         updatedAt: response.data.card.updatedAt ? new Date(response.data.card.updatedAt) : undefined,
       }

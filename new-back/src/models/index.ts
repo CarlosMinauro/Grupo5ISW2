@@ -39,6 +39,10 @@ Expense.belongsTo(Category, { foreignKey: 'category_id' });
 Category.hasMany(Budget, { foreignKey: 'category_id' });
 Budget.belongsTo(Category, { foreignKey: 'category_id' });
 
+// Relación de usuario principal y usuarios adicionales
+User.hasMany(User, { foreignKey: 'parent_user_id', as: 'additionalUsers' });
+User.belongsTo(User, { foreignKey: 'parent_user_id', as: 'parentUser' });
+
 export {
   User,
   Role,

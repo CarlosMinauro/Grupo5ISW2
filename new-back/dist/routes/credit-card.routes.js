@@ -14,5 +14,8 @@ const cardValidation = [
 router.use(auth_middleware_1.authenticateToken);
 router.get('/', creditCardController.getCards.bind(creditCardController));
 router.post('/', cardValidation, creditCardController.addCard.bind(creditCardController));
+router.put('/:id', creditCardController.editCard.bind(creditCardController));
+router.get('/:id/amount-due', creditCardController.getAmountDue.bind(creditCardController));
+router.delete('/:id', creditCardController.deleteCard.bind(creditCardController));
 exports.default = router;
 //# sourceMappingURL=credit-card.routes.js.map

@@ -36,4 +36,6 @@ category_model_1.default.hasMany(expense_model_1.default, { foreignKey: 'categor
 expense_model_1.default.belongsTo(category_model_1.default, { foreignKey: 'category_id' });
 category_model_1.default.hasMany(budget_model_1.default, { foreignKey: 'category_id' });
 budget_model_1.default.belongsTo(category_model_1.default, { foreignKey: 'category_id' });
+user_model_1.default.hasMany(user_model_1.default, { foreignKey: 'parent_user_id', as: 'additionalUsers' });
+user_model_1.default.belongsTo(user_model_1.default, { foreignKey: 'parent_user_id', as: 'parentUser' });
 //# sourceMappingURL=index.js.map

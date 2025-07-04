@@ -78,12 +78,12 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell align="right">Amount</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>Fecha</TableCell>
+              <TableCell>Categoría</TableCell>
+              <TableCell>Descripción</TableCell>
+              <TableCell>Tipo</TableCell>
+              <TableCell align="right">Monto</TableCell>
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -93,13 +93,13 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
                   <TableCell>{formatDate(expense.date)}</TableCell>
                   <TableCell>{getCategoryName(expense.category_id)}</TableCell>
                   <TableCell>{expense.description}</TableCell>
-                  <TableCell>{expense.transaction_type}</TableCell>
+                  <TableCell>{expense.transaction_type === 'expense' ? 'Gasto' : expense.transaction_type === 'payment' ? 'Pago' : expense.transaction_type}</TableCell>
                   <TableCell align="right">{formatCurrency(expense.amount)}</TableCell>
                   <TableCell>
-                    {onEdit && <Button onClick={() => onEdit(expense)}>Edit</Button>}
+                    {onEdit && <Button onClick={() => onEdit(expense)}>Editar</Button>}
                     {onDelete && (
                       <Button onClick={() => handleDeleteClick(expense)} color="error">
-                        Delete
+                        Eliminar
                       </Button>
                     )}
                   </TableCell>
@@ -109,7 +109,7 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
               <TableRow>
                 <TableCell colSpan={5} align="center">
                   <Typography variant="body2" color="text.secondary">
-                    No expenses found
+                    No se encontraron gastos
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -125,20 +125,20 @@ const ExpenseList: React.FC<ExpenseListProps> = ({
         aria-describedby="delete-dialog-description"
       >
         <DialogTitle id="delete-dialog-title">
-          Confirm Delete
+          Confirmar eliminación
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete the expense "{expenseToDelete?.description}" for {expenseToDelete ? formatCurrency(expenseToDelete.amount) : ''}?
-            This action cannot be undone.
+            ¿Estás seguro de que deseas eliminar el gasto "{expenseToDelete?.description}" por {expenseToDelete ? formatCurrency(expenseToDelete.amount) : ''}?
+            Esta acción no se puede deshacer.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={handleConfirmDelete} color="error" autoFocus>
-            Delete
+            Eliminar
           </Button>
         </DialogActions>
       </Dialog>

@@ -8,11 +8,13 @@ class CreditCard extends Model<ICreditCard> implements ICreditCard {
   public user_id!: number;
   public card_number!: string;
   public card_holder_name!: string;
-  public expiration_date!: Date | null;
+  public expiration_date?: Date | null;
   public brand!: string;
   public bank!: string;
   public is_active!: boolean;
   public created_at!: Date;
+  public cut_off_date?: Date | null;
+  public payment_due_date?: Date | null;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -61,6 +63,14 @@ CreditCard.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+    },
+    cut_off_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    payment_due_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { LoginCredentials, RegisterData, ApiResponse, User, Expense, Budget, Category } from '../types';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -67,6 +67,7 @@ export const expenseService = {
         date: String(expense.date),
         recurring: Boolean(expense.recurring),
         credit_card_id: expense.credit_card_id ? Number(expense.credit_card_id) : undefined,
+        transaction_type: String(expense.transaction_type),
         createdAt: expense.createdAt ? new Date(expense.createdAt) : undefined,
         updatedAt: expense.updatedAt ? new Date(expense.updatedAt) : undefined,
       };
@@ -218,6 +219,19 @@ export const categoryService = {
     }));
     return { success: true, message: 'Categories fetched successfully', data: categories };
   },
+};
+
+// Usuarios adicionales
+export const registerAdditionalUser = async (data: any) => {
+  return await api.post('/api/account-status/users/additional', data);
+};
+
+export const getAdditionalUsers = async () => {
+  return await api.get('/api/account-status/users/additional');
+};
+
+export const deleteAdditionalUser = async (id: number) => {
+  return await api.delete(`/api/account-status/users/additional/${id}`);
 };
 
 export default api; 

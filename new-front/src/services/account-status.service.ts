@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_URL } from '../config';
+import api from './api';
 
 export interface MonthlyStatus {
   month: number;
@@ -12,6 +13,7 @@ export interface MonthlyStatus {
     categoryName: string;
     amount: number;
   }[];
+  totalPaid: number;
 }
 
 export class AccountStatusService {
@@ -52,4 +54,19 @@ export class AccountStatusService {
       throw new Error('Error fetching monthly status');
     }
   }
-} 
+
+  async getMontoPorVencer(dias = 7) {
+    const response = await api.get(`/api/account-status/por-vencer?dias=${dias}`);
+    return response.data;
+  }
+}
+
+export const getMontoPorVencer = async (dias = 7) => {
+  const response = await api.get(`/api/account-status/por-vencer?dias=${dias}`);
+  return response.data;
+};
+
+export const updateProfile = async (profileData: { name?: string; email?: string; password?: string }) => {
+  const response = await api.put('/api/users/profile', profileData);
+  return response.data;
+}; 

@@ -1,20 +1,56 @@
 import request from 'supertest';
-import app from '../app';
-import { CategoryService } from '../services/category.service';
-import { CategoryRepository } from '../repositories/category.repository';
+import { app } from '../app';
+import { Role, User } from '../models';
 
 describe('Category API', () => {
   let authToken: string;
+  let testUser: any;
+  let testRole: any;
+  const uniqueId = Date.now();
 
   beforeAll(async () => {
-    // Login to get token
+    // Limpiar todas las tablas relevantes para evitar duplicidad
+    const { CreditCard, Expense, Category, User, Role } = require('../models');
+    await Promise.all([
+      CreditCard.destroy({ where: {} }),
+      Expense.destroy({ where: {} }),
+      Category.destroy({ where: {} }),
+      User.destroy({ where: {} }),
+      Role.destroy({ where: {} })
+    ]);
+    // Crear rol de prueba
+    testRole = await Role.create({
+      id: uniqueId,
+      name: 'test-role-' + uniqueId,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    // Registrar usuario de prueba
+    testUser = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: `user${uniqueId}@example.com`,
+        password: 'testpassword123',
+        name: 'Test User',
+        role_id: uniqueId
+      });
+    // Login para obtener token válido
     const loginResponse = await request(app)
       .post('/api/auth/login')
-      .send({
-        email: 'admin@example.com',
-        password: 'admin123'
-      });
+      .send({ email: `user${uniqueId}@example.com`, password: 'testpassword123' });
     authToken = loginResponse.body.token;
+    if (!authToken) {
+      throw new Error('No se pudo obtener un token válido. Respuesta: ' + JSON.stringify(loginResponse.body));
+    }
+  });
+
+  afterAll(async () => {
+    if (testUser && testUser.body && testUser.body.user) {
+      await User.destroy({ where: { id: testUser.body.user.id } });
+    }
+    if (testRole) {
+      await Role.destroy({ where: { id: testRole.id } });
+    }
   });
 
   describe('GET /api/categories', () => {

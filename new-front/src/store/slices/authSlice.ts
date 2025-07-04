@@ -83,9 +83,10 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        localStorage.setItem('token', action.payload.token);
+        // No marcar como autenticado ni guardar token tras registro
+        // state.isAuthenticated = true;
+        // state.user = action.payload.user;
+        // localStorage.setItem('token', action.payload.token);
       })
       .addCase(register.rejected, (state, action) => {
         state.loading = false;

@@ -52,6 +52,14 @@ CreditCard.init({
         allowNull: false,
         defaultValue: sequelize_1.DataTypes.NOW,
     },
+    cut_off_date: {
+        type: sequelize_1.DataTypes.DATE,
+        allowNull: true,
+    },
+    payment_due_date: {
+        type: sequelize_1.DataTypes.DATE,
+        allowNull: true,
+    },
 }, {
     sequelize: database_1.default,
     tableName: 'CreditCards',

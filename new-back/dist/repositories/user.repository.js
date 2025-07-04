@@ -19,6 +19,12 @@ class UserRepository extends base_repository_1.BaseRepository {
     async findByRole(roleId) {
         return this.findBy({ role_id: roleId });
     }
+    async createAdditionalUser(userData) {
+        return this.create(userData);
+    }
+    async findAdditionalUsers(parentUserId) {
+        return this.findBy({ parent_user_id: parentUserId });
+    }
 }
 exports.UserRepository = UserRepository;
 //# sourceMappingURL=user.repository.js.map

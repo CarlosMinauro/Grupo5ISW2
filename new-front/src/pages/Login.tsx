@@ -56,7 +56,7 @@ const Login: React.FC = () => {
       <Box sx={{ mt: 8 }}>
         <Paper sx={{ p: 4 }}>
           <Typography variant="h4" align="center" gutterBottom>
-            Login
+            Iniciar sesión
           </Typography>
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -67,7 +67,7 @@ const Login: React.FC = () => {
             <Input
               fullWidth
               margin="normal"
-              label="Email"
+              label="Correo electrónico"
               name="email"
               type="email"
               value={formData.email}
@@ -78,7 +78,7 @@ const Login: React.FC = () => {
             <Input
               fullWidth
               margin="normal"
-              label="Password"
+              label="Contraseña"
               name="password"
               type="password"
               value={formData.password}
@@ -96,7 +96,7 @@ const Login: React.FC = () => {
               {loading ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
-                'Login'
+                'Iniciar sesión'
               )}
             </Button>
             <Button
@@ -106,7 +106,7 @@ const Login: React.FC = () => {
               onClick={() => navigate('/register')}
               disabled={loading}
             >
-              Don't have an account? Register
+              ¿No tienes una cuenta? Regístrate
             </Button>
           </form>
         </Paper>

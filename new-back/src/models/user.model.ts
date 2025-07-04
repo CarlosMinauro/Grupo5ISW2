@@ -9,6 +9,7 @@ class User extends Model<IUser> implements IUser {
   public email!: string;
   public password_hash!: string;
   public role_id!: number;
+  public parent_user_id?: number | null;
 }
 
 User.init(
@@ -41,8 +42,16 @@ User.init(
         model: Role,
         key: 'id',
       },
-    }
-  },
+    },
+    parent_user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Usuario',
+        key: 'id',
+      },
+    },
+  } as any,
   {
     sequelize,
     tableName: 'Usuario',

@@ -38,12 +38,12 @@ const Register: React.FC = () => {
     setValidationError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setValidationError('Passwords do not match');
+      setValidationError('Las contraseñas no coinciden');
       return;
     }
 
     if (formData.password.length < 6) {
-      setValidationError('Password must be at least 6 characters long');
+      setValidationError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -55,7 +55,7 @@ const Register: React.FC = () => {
     }));
 
     if (register.fulfilled.match(result)) {
-      navigate('/dashboard');
+      navigate('/login');
     }
   };
 
@@ -64,7 +64,7 @@ const Register: React.FC = () => {
       <Box sx={{ mt: 8 }}>
         <Paper sx={{ p: 4 }}>
           <Typography variant="h4" align="center" gutterBottom>
-            Register
+            Registrarse
           </Typography>
           {(error || validationError) && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -75,7 +75,7 @@ const Register: React.FC = () => {
             <Input
               fullWidth
               margin="normal"
-              label="Name"
+              label="Nombre"
               name="name"
               value={formData.name}
               onChange={handleChange}
@@ -84,7 +84,7 @@ const Register: React.FC = () => {
             <Input
               fullWidth
               margin="normal"
-              label="Email"
+              label="Correo electrónico"
               name="email"
               type="email"
               value={formData.email}
@@ -94,7 +94,7 @@ const Register: React.FC = () => {
             <Input
               fullWidth
               margin="normal"
-              label="Password"
+              label="Contraseña"
               name="password"
               type="password"
               value={formData.password}
@@ -104,7 +104,7 @@ const Register: React.FC = () => {
             <Input
               fullWidth
               margin="normal"
-              label="Confirm Password"
+              label="Confirmar contraseña"
               name="confirmPassword"
               type="password"
               value={formData.confirmPassword}
@@ -118,7 +118,7 @@ const Register: React.FC = () => {
               sx={{ mt: 3 }}
               disabled={loading}
             >
-              {loading ? 'Loading...' : 'Register'}
+              {loading ? 'Cargando...' : 'Registrarse'}
             </Button>
             <Button
               fullWidth
@@ -126,7 +126,7 @@ const Register: React.FC = () => {
               sx={{ mt: 1 }}
               onClick={() => navigate('/login')}
             >
-              Already have an account? Login
+              ¿Ya tienes una cuenta? Inicia sesión
             </Button>
           </form>
         </Paper>

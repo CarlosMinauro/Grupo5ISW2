@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
@@ -13,9 +14,11 @@ const budget_routes_1 = __importDefault(require("./routes/budget.routes"));
 const category_routes_1 = __importDefault(require("./routes/category.routes"));
 const account_status_routes_1 = __importDefault(require("./routes/account-status.routes"));
 const credit_card_routes_1 = __importDefault(require("./routes/credit-card.routes"));
+const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const database_1 = __importDefault(require("./config/database"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+exports.app = app;
 app.use((0, cors_1.default)({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true,
@@ -33,6 +36,7 @@ app.use('/api/budgets', budget_routes_1.default);
 app.use('/api/categories', category_routes_1.default);
 app.use('/api/account-status', account_status_routes_1.default);
 app.use('/api/cards', credit_card_routes_1.default);
+app.use('/api/users', user_routes_1.default);
 app.use((err, _req, res, _next) => {
     console.error(err.stack);
     res.status(500).json({

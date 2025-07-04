@@ -1,10 +1,9 @@
-import { Expense, Category, Budget } from '../models';
+import { Expense, Category } from '../models';
 import { Op } from 'sequelize';
 
 export interface MonthlyStatus {
   month: number;
   year: number;
-  totalIncome: number;
   totalExpenses: number;
   balance: number;
   expensesByCategory: {
@@ -12,6 +11,7 @@ export interface MonthlyStatus {
     categoryName: string;
     amount: number;
   }[];
+  totalPaid: number;
 }
 
 export class AccountStatusService {
@@ -59,34 +59,21 @@ export class AccountStatusService {
 
       console.log('AccountStatusService: Expenses found:', expenses.length);
 
-      const totalExpenses = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
-      
-      // Fetch all budgets for the user
-      console.log('AccountStatusService: Attempting to fetch budgets for user:', userId);
-      const budgets = await Budget.findAll({
-        where: {
-          user_id: userId,
-        },
-      });
+      // Calcular total pagado (type 'payment')
+      const totalPaid = expenses
+        .filter(expense => expense.transaction_type === 'payment')
+        .reduce((sum, expense) => sum + Number(expense.amount), 0);
 
-      console.log('AccountStatusService: Budgets found:', budgets.length);
-      console.log('AccountStatusService: Budgets data:', JSON.stringify(budgets));
-
-      // Sum the monthly_budget for all fetched budgets
-      const totalBudget = budgets.reduce((sum, budget) => sum + Number(budget.monthly_budget), 0);
-
-      console.log('AccountStatusService: Total budget calculated:', totalBudget);
-
-      // Assign totalBudget to totalIncome
-      const totalIncome = totalBudget;
+      // Calcular gastos totales (type 'expense')
+      const totalExpenses = expenses
+        .filter(expense => expense.transaction_type === 'expense')
+        .reduce((sum, expense) => sum + Number(expense.amount), 0);
 
       console.log('AccountStatusService: Processing expenses by category');
       const expensesByCategory = expenses.reduce((acc, expense) => {
         const categoryId = expense.Category?.id || 0; // Default to 0 or a special ID for uncategorized
         const categoryName = expense.Category?.name || 'Uncategorized';
-        
         const existingCategory = acc.find(cat => cat.categoryId === categoryId);
-
         if (existingCategory) {
           existingCategory.amount += Number(expense.amount);
         } else {
@@ -96,17 +83,16 @@ export class AccountStatusService {
             amount: Number(expense.amount)
           });
         }
-
         return acc;
       }, [] as { categoryId: number; categoryName: string; amount: number }[]);
 
       return {
         month,
         year,
-        totalIncome,
         totalExpenses,
-        balance: totalIncome - totalExpenses,
-        expensesByCategory
+        balance: totalPaid - totalExpenses,
+        expensesByCategory,
+        totalPaid
       };
     } catch (error) {
       console.error('Error en getMonthlyStatus:', error);
