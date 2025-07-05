@@ -26,7 +26,7 @@ Role.init(
     sequelize,
     tableName: 'Role',
     schema: 'public',
-    timestamps: false,
+    timestamps: true,
   }
 );
 

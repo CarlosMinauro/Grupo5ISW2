@@ -49,7 +49,4 @@ AccessLog.init(
   }
 );
 
-// Define associations
-AccessLog.belongsTo(User, { foreignKey: 'user_id' });
-
 export default AccessLog; 

@@ -7,41 +7,47 @@ import AccessLog from './access-log.model';
 import PasswordReset from './password-reset.model';
 import CreditCard from './credit-card.model';
 
-// User - Role relationship
-User.belongsTo(Role, { foreignKey: 'role_id' });
-Role.hasMany(User, { foreignKey: 'role_id' });
+// Función para inicializar todas las asociaciones
+function initializeAssociations() {
+  // User - Role relationship
+  User.belongsTo(Role, { foreignKey: 'role_id' });
+  Role.hasMany(User, { foreignKey: 'role_id' });
 
-// User - Expense relationship
-User.hasMany(Expense, { foreignKey: 'user_id' });
-Expense.belongsTo(User, { foreignKey: 'user_id' });
+  // User - Expense relationship
+  User.hasMany(Expense, { foreignKey: 'user_id' });
+  Expense.belongsTo(User, { foreignKey: 'user_id' });
 
-// User - Budget relationship
-User.hasMany(Budget, { foreignKey: 'user_id' });
-Budget.belongsTo(User, { foreignKey: 'user_id' });
+  // User - Budget relationship
+  User.hasMany(Budget, { foreignKey: 'user_id' });
+  Budget.belongsTo(User, { foreignKey: 'user_id' });
 
-// User - AccessLog relationship
-User.hasMany(AccessLog, { foreignKey: 'user_id' });
-AccessLog.belongsTo(User, { foreignKey: 'user_id' });
+  // User - AccessLog relationship
+  User.hasMany(AccessLog, { foreignKey: 'user_id' });
+  AccessLog.belongsTo(User, { foreignKey: 'user_id' });
 
-// User - PasswordReset relationship
-User.hasMany(PasswordReset, { foreignKey: 'usuarioId' });
-PasswordReset.belongsTo(User, { foreignKey: 'usuarioId' });
+  // User - PasswordReset relationship
+  User.hasMany(PasswordReset, { foreignKey: 'usuarioId' });
+  PasswordReset.belongsTo(User, { foreignKey: 'usuarioId' });
 
-// User - CreditCard relationship
-User.hasMany(CreditCard, { foreignKey: 'user_id' });
-CreditCard.belongsTo(User, { foreignKey: 'user_id' });
+  // User - CreditCard relationship
+  User.hasMany(CreditCard, { foreignKey: 'user_id' });
+  CreditCard.belongsTo(User, { foreignKey: 'user_id' });
 
-// Category - Expense relationship
-Category.hasMany(Expense, { foreignKey: 'category_id' });
-Expense.belongsTo(Category, { foreignKey: 'category_id' });
+  // Category - Expense relationship
+  Category.hasMany(Expense, { foreignKey: 'category_id' });
+  Expense.belongsTo(Category, { foreignKey: 'category_id' });
 
-// Category - Budget relationship
-Category.hasMany(Budget, { foreignKey: 'category_id' });
-Budget.belongsTo(Category, { foreignKey: 'category_id' });
+  // Category - Budget relationship
+  Category.hasMany(Budget, { foreignKey: 'category_id' });
+  Budget.belongsTo(Category, { foreignKey: 'category_id' });
 
-// Relación de usuario principal y usuarios adicionales
-User.hasMany(User, { foreignKey: 'parent_user_id', as: 'additionalUsers' });
-User.belongsTo(User, { foreignKey: 'parent_user_id', as: 'parentUser' });
+  // Relación de usuario principal y usuarios adicionales
+  User.hasMany(User, { foreignKey: 'parent_user_id', as: 'additionalUsers' });
+  User.belongsTo(User, { foreignKey: 'parent_user_id', as: 'parentUser' });
+}
+
+// Inicializar asociaciones
+initializeAssociations();
 
 export {
   User,

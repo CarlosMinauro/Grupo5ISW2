@@ -84,9 +84,4 @@ Expense.init(
   }
 );
 
-// Define associations
-Expense.belongsTo(User, { foreignKey: 'user_id' });
-Expense.belongsTo(Category, { foreignKey: 'category_id' });
-Expense.belongsTo(CreditCard, { foreignKey: 'credit_card_id' });
-
 export default Expense; 

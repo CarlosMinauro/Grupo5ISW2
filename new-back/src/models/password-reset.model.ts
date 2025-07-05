@@ -45,7 +45,4 @@ PasswordReset.init(
   }
 );
 
-// Define associations
-PasswordReset.belongsTo(User, { foreignKey: 'usuarioId' });
-
 export default PasswordReset; 

@@ -8,8 +8,8 @@ const sequelize = new Sequelize({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME || 'pw-2025-0_db',
-  username: process.env.DB_USER || 'carlo',
-  password: process.env.DB_PASSWORD || '',
+  username: process.env.DB_USER || 'Fach',
+  password: process.env.DB_PASSWORD || 'kenay123',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   define: {
     timestamps: false,

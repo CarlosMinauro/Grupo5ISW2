@@ -36,7 +36,7 @@ export interface IBudget {
 }
 
 export interface IExpense {
-  id: number;
+  id?: number;
   user_id: number;
   date: Date;
   amount: number;
@@ -50,7 +50,7 @@ export interface IExpense {
 }
 
 export interface ICategory {
-  id: number;
+  id?: number;
   name: string;
   createdAt?: Date;
   updatedAt?: Date;

@@ -60,7 +60,4 @@ User.init(
   }
 );
 
-// Define associations
-User.belongsTo(Role, { foreignKey: 'role_id' });
-
 export default User; 

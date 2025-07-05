@@ -48,8 +48,4 @@ Budget.init(
   }
 );
 
-// Define associations
-Budget.belongsTo(User, { foreignKey: 'user_id' });
-Budget.belongsTo(Category, { foreignKey: 'category_id' });
-
 export default Budget; 

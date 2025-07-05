@@ -37,18 +37,18 @@ export class AccountStatusService {
         throw new Error('El ID de la tarjeta es requerido');
       }
 
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-
-      console.log('AccountStatusService: Attempting to fetch expenses between:', startDate, 'and', endDate);
-      console.log('AccountStatusService: For user:', userId, 'and credit card:', creditCardId);
+      // Use date strings for DATEONLY field comparison
+      const startDateStr = `${year}-${month.toString().padStart(2, '0')}-01`;
+      const lastDayOfMonth = new Date(year, month, 0).getDate();
+      const endDateStr = `${year}-${month.toString().padStart(2, '0')}-${lastDayOfMonth.toString().padStart(2, '0')}`;
 
       const expenses = await Expense.findAll({
         where: {
           user_id: userId,
           credit_card_id: creditCardId,
           date: {
-            [Op.between]: [startDate, endDate]
+            [Op.gte]: startDateStr,
+            [Op.lte]: endDateStr
           }
         },
         include: [{
@@ -57,21 +57,21 @@ export class AccountStatusService {
         }]
       });
 
-      console.log('AccountStatusService: Expenses found:', expenses.length);
+      // Asegurarse de que expenses sea un array
+      const expensesArray = expenses || [];
 
       // Calcular total pagado (type 'payment')
-      const totalPaid = expenses
+      const totalPaid = expensesArray
         .filter(expense => expense.transaction_type === 'payment')
         .reduce((sum, expense) => sum + Number(expense.amount), 0);
 
       // Calcular gastos totales (type 'expense')
-      const totalExpenses = expenses
+      const totalExpenses = expensesArray
         .filter(expense => expense.transaction_type === 'expense')
         .reduce((sum, expense) => sum + Number(expense.amount), 0);
 
-      console.log('AccountStatusService: Processing expenses by category');
-      const expensesByCategory = expenses.reduce((acc, expense) => {
-        const categoryId = expense.Category?.id || 0; // Default to 0 or a special ID for uncategorized
+      const expensesByCategory = expensesArray.reduce((acc, expense) => {
+        const categoryId = expense.Category?.id || 0;
         const categoryName = expense.Category?.name || 'Uncategorized';
         const existingCategory = acc.find(cat => cat.categoryId === categoryId);
         if (existingCategory) {
